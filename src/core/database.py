@@ -1,4 +1,10 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from asyncio import current_task
+
+from sqlalchemy.ext.asyncio import (
+    async_scoped_session,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from core.config import settings
@@ -38,3 +44,10 @@ async def create_tables() -> None:
 async def delete_tables() -> None:
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.drop_all)
+
+
+def get_scoped_session():
+    return async_scoped_session(
+        session_factory=session_maker,
+        scopefunc=current_task,
+    )
