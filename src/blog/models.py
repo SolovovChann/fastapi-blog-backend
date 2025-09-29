@@ -1,6 +1,8 @@
+import bleach
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import Mapped, mapped_column, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
+from auth.models import User
 from core.database import Base, Model
 from utils import slugify
 
@@ -58,7 +60,40 @@ class Category(Base):
         nullable=False,
         primary_key=True,
     )
+    posts: "Mapped[list[Post]]" = relationship(
+        "Post",
+        secondary=post_category,
+        back_populates="categories",
+    )
 
     @validates("slug")
     def validate_slug(self, key: str, value: str) -> str:
         return slugify(value)
+
+
+class Post(Model):
+    __tablename__ = "posts"
+
+    author_id = Column(Integer, ForeignKey("users.id"))
+    author: Mapped[User] = relationship("User", back_populates="posts")
+    title: Mapped[str]
+    slug: Mapped[str] = mapped_column(
+        String(150),
+        unique=True,
+        nullable=False,
+    )
+    content: Mapped[str]
+    categories: Mapped[list[Category]] = relationship(
+        "Category",
+        secondary=post_category,
+        back_populates="posts",
+    )
+
+    @validates("content")
+    def validate_content(self, key: str, value: str) -> str:
+        # NOTE bleach is deprecated since 2023
+        return bleach.clean(
+            value,
+            tags=AVAILABLE_TAGS,
+            attributes=AVAILABLE_ATTRIBUTES,
+        )
