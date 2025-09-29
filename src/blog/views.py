@@ -52,7 +52,9 @@ async def create_post(
     user: Annotated[User, Depends(auth.get_current_subject)],
     session: AsyncSession = Depends(get_scoped_session),
 ) -> PostSchema:
-    return _post_to_schema(await services.create_post(session, await user, data))
+    return _post_to_schema(
+        await services.create_post(session, await user, data)
+    )
 
 
 @categories_router.delete(
@@ -85,7 +87,9 @@ async def get_all_categories(
 
 
 @posts_router.get("/")
-async def get_all_posts(session: AsyncSession = Depends(get_scoped_session)):
+async def get_all_posts(
+    session: AsyncSession = Depends(get_scoped_session),
+) -> list[PostSchema]:
     return [
         _post_to_schema(post) for post in await services.get_all_posts(session)
     ]
