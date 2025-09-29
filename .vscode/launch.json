@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "cwd": "${workspaceFolder}",
+      "cwd": "${workspaceFolder}/src",
       "name": "Python Debugger: FastAPI",
       "type": "debugpy",
       "request": "launch",
