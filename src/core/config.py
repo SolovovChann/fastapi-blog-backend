@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from authx import AuthX, AuthXConfig
 from pydantic_settings import BaseSettings
 
 
@@ -15,3 +16,11 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+auth = AuthX(
+    AuthXConfig(
+        JWT_ALGORITHM="HS256",
+        JWT_SECRET_KEY=settings.SECRET_KEY,
+        JWT_TOKEN_LOCATION=["headers"],
+    )
+)
