@@ -28,3 +28,8 @@ class Model(Base):
     __abstract__ = True
 
     id: Mapped[int] = mapped_column(primary_key=True)
+
+
+async def create_tables() -> None:
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
