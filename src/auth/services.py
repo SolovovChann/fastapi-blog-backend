@@ -58,3 +58,15 @@ async def register_new_user(session: AsyncSession, data: RegisterData) -> User:
     await session.refresh(user)
 
     return user
+
+
+async def set_user_role(
+    session: AsyncSession,
+    user: User,
+    role: UserRole,
+) -> User:
+    user.role = role
+    await session.commit()
+    await session.refresh(user)
+
+    return user
