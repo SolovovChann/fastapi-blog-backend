@@ -9,6 +9,7 @@ from auth.schemas import (
     Credentials,
     RefreshData,
     RegisterData,
+    SetRole,
     Tokens,
 )
 from core.config import auth
@@ -123,3 +124,20 @@ async def get_authenticated_user_profile(
         full_name=user.full_name,
         role=user.role,
     )
+
+
+@router.post("/set-role")
+async def set_user_role(
+    data: SetRole,
+    user: User = Depends(auth.get_current_subject),
+    session: AsyncSession = Depends(get_scoped_session),
+) -> None:
+    services.is_admin_or_raise_401(await user)
+
+    target = await services.get_user_by_email(session, data.user_email)
+
+    if target is None:
+        detail = f"User with email '{data.user_email}' is not found"
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail)
+
+    await services.set_user_role(session, target, data.role)

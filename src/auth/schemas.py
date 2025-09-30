@@ -33,3 +33,8 @@ class RefreshData(BaseModel):
 class Tokens(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class SetRole(BaseModel):
+    user_email: EmailStr
+    role: UserRole
