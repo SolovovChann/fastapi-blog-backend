@@ -67,5 +67,8 @@ async def session_dependency() -> AsyncGenerator[AsyncSession, None]:
 @asynccontextmanager
 async def scoped_session_dependency() -> AsyncGenerator[AsyncSession, None]:
     session = get_scoped_session()
-    yield session
-    await session.close()
+
+    try:
+        yield session
+    finally:
+        await session.close()
