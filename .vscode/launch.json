@@ -3,6 +3,9 @@
   "configurations": [
     {
       "cwd": "${workspaceFolder}/src",
+      "env": {
+        "DEBUG": "True"
+      },
       "name": "Python Debugger: FastAPI",
       "type": "debugpy",
       "request": "launch",
