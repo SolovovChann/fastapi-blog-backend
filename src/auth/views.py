@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth import services
 from auth.models import User
+from auth.dependencies import get_user_by_JWT_token
 from auth.schemas import (
     BaseUser,
     Credentials,
@@ -93,32 +94,10 @@ async def refresh_token(request: Request, data: RefreshData) -> Tokens:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail)
 
 
-@auth.set_subject_getter
-async def _get_user_from_uid(uid: str, whatever=None) -> User:
-    # NOTE auth.set_subject_getter does not support async functions.
-    # You should use it with await
-
-    try:
-        user_id = int(uid)
-    except ValueError as exc:
-        detail = "Invalid token, please login again"
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail) from exc
-
-    session_maker = get_scoped_session()
-    user = await services.get_user_by_id(session_maker(), user_id)
-
-    if user is None:
-        detail = f"User with ID '{user_id}' is not found"
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail)
-
-    return user
-
-
 @router.get("/me")
 async def get_authenticated_user_profile(
-    user: User = Depends(auth.get_current_subject),
+    user: User = Depends(get_user_by_JWT_token),
 ) -> BaseUser:
-    user = await user
     return BaseUser(
         email=user.email,
         full_name=user.full_name,
@@ -129,10 +108,10 @@ async def get_authenticated_user_profile(
 @router.post("/set-role")
 async def set_user_role(
     data: SetRole,
-    user: User = Depends(auth.get_current_subject),
+    user: User = Depends(get_user_by_JWT_token),
     session: AsyncSession = Depends(get_scoped_session),
 ) -> None:
-    services.is_admin_or_raise_401(await user)
+    services.is_admin_or_raise_401(user)
 
     target = await services.get_user_by_email(session, data.user_email)
 

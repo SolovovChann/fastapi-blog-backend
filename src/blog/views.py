@@ -11,6 +11,7 @@ from blog.schemas import Post as PostSchema
 from blog.schemas import PostCreate, PostUpdate, PostUpdatePartial
 from core.config import auth
 from core.database import get_scoped_session
+from auth.dependencies import get_user_by_JWT_token
 
 
 posts_router = APIRouter(prefix="/posts", tags=["Posts"])
@@ -51,24 +52,20 @@ def _category_to_schema(category: Category) -> CategorySchema:
 @categories_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_category(
     data: CategoryCreate,
-    user: User = Depends(auth.get_current_subject),
+    user: User = Depends(get_user_by_JWT_token),
     session: AsyncSession = Depends(get_scoped_session),
 ) -> CategorySchema:
-    user = await user
     is_admin_or_raise_401(user)
-
     return _category_to_schema(await services.create_category(session, data))
 
 
 @posts_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_post(
     data: PostCreate,
-    user: User = Depends(auth.get_current_subject),
+    user: User = Depends(get_user_by_JWT_token),
     session: AsyncSession = Depends(get_scoped_session),
 ) -> PostSchema:
-    user = await user
     is_admin_or_raise_401(user)
-
     return _post_to_schema(await services.create_post(session, user, data))
 
 
@@ -77,21 +74,20 @@ async def create_post(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_category(
-    user: User = Depends(auth.get_current_subject),
+    user: User = Depends(get_user_by_JWT_token),
     category: Category = Depends(dependencies.get_category_by_slug),
     session: AsyncSession = Depends(get_scoped_session),
 ):
-    is_admin_or_raise_401(await user)
+    is_admin_or_raise_401(user)
     await services.delete_category(session, category)
 
 
 @posts_router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(
-    user: User = Depends(auth.get_current_subject),
+    user: User = Depends(get_user_by_JWT_token),
     post: Post = Depends(dependencies.get_post_by_id),
     session: AsyncSession = Depends(get_scoped_session),
 ):
-    user = await user
     is_admin_or_raise_401(user)
     is_author_or_raise_401(user, post)
 
@@ -134,11 +130,11 @@ async def get_post_by_id(
 @categories_router.patch("/{category_slug}")
 async def partial_update_category(
     data: CategoryUpdatePartial,
-    user: User = Depends(auth.get_current_subject),
+    user: User = Depends(get_user_by_JWT_token),
     category: Category = Depends(dependencies.get_category_by_slug),
     session: AsyncSession = Depends(get_scoped_session),
 ) -> CategorySchema:
-    is_admin_or_raise_401(await user)
+    is_admin_or_raise_401(user)
     return _category_to_schema(
         await services.update_category(
             session,
@@ -152,11 +148,10 @@ async def partial_update_category(
 @posts_router.patch("/{post_id}")
 async def partial_update_post(
     data: PostUpdatePartial,
-    user: User = Depends(auth.get_current_subject),
+    user: User = Depends(get_user_by_JWT_token),
     post: Post = Depends(dependencies.get_post_by_id),
     session: AsyncSession = Depends(get_scoped_session),
 ):
-    user = await user
     is_admin_or_raise_401(user)
     is_author_or_raise_401(user, post)
 
@@ -168,11 +163,11 @@ async def partial_update_post(
 @categories_router.put("/{category_slug}")
 async def update_category(
     data: CategoryUpdate,
-    user: User = Depends(auth.get_current_subject),
+    user: User = Depends(get_user_by_JWT_token),
     category: Category = Depends(dependencies.get_category_by_slug),
     session: AsyncSession = Depends(get_scoped_session),
 ):
-    is_admin_or_raise_401(await user)
+    is_admin_or_raise_401(user)
     return _category_to_schema(
         await services.update_category(session, category, data)
     )
@@ -181,11 +176,10 @@ async def update_category(
 @posts_router.put("/{post_id}")
 async def update_post(
     data: PostUpdate,
-    user: User = Depends(auth.get_current_subject),
+    user: User = Depends(get_user_by_JWT_token),
     post: Post = Depends(dependencies.get_post_by_id),
     session: AsyncSession = Depends(get_scoped_session),
 ):
-    user = await user
     is_admin_or_raise_401(user)
     is_author_or_raise_401(user, post)
 
