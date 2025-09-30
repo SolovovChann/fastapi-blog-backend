@@ -13,10 +13,10 @@ docker build -t fastapi-blog:$(date +%Y-%m-%d) -t fastapi-blog:latest .
 Запуск контейнера
 
 ```cmd
-docker run -d --port 8000:8000 fastapi-blog:latest
+docker run -d --port 8000:8000 --env SECRET_KEY=<Your secret key> fastapi-blog:latest
 ```
 
-## Установка для разработка
+## Установка для разработки
 
 Установите зависимости
 
