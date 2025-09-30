@@ -21,7 +21,7 @@ class User(Model):
         nullable=False,
     )
     full_name: Mapped[str] = mapped_column(String(150), nullable=True)
-    password: Mapped[str] = mapped_column(String(1024), unique=True)
+    password: Mapped[str] = mapped_column(String(1024))
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole),
         default=UserRole.USER,
