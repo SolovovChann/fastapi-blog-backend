@@ -30,6 +30,7 @@ class User(Model):
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole),
         default=UserRole.USER,
+        nullable=False,
     )
     posts = relationship("Post", back_populates="author")
 
