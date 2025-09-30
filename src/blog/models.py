@@ -95,6 +95,9 @@ class Post(Model):
         back_populates="posts",
     )
 
+    def __repr__(self) -> str:
+        return f"<Post({self.id=}, {self.title=}, {self.slug=})>"
+
     @validates("content")
     def validate_content(self, key: str, value: str) -> str:
         # NOTE bleach is deprecated since 2023
