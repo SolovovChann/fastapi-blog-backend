@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import (
+    AsyncAttrs,
     AsyncSession,
     async_scoped_session,
     async_sessionmaker,
@@ -22,7 +23,7 @@ session_maker = async_sessionmaker(
 )
 
 
-class Base(DeclarativeBase):
+class Base(AsyncAttrs, DeclarativeBase):
     """Base class for all ORM model classes"""
 
     pass
