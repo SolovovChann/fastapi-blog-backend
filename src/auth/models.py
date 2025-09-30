@@ -7,8 +7,8 @@ from core.database import Model
 
 
 class UserRole(enum.Enum):
-    USER = 0
-    ADMIN = 1
+    USER = "USER"
+    ADMIN = "ADMIN"
 
 
 class User(Model):
