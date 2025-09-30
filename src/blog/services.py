@@ -32,10 +32,9 @@ async def create_post(
     data: PostCreate,
 ) -> Post:
     data_as_dict = data.model_dump()
-    categories = data_as_dict.pop("categories")
-    post = Post(**data_as_dict, author=author)
+    categories: list[Category] = []
 
-    for slug in categories:
+    for slug in data_as_dict.pop("categories", []):
         category = await get_category_by_slug(session, slug)
 
         if category is None:
@@ -43,8 +42,9 @@ async def create_post(
             # Rewrite later
             continue
 
-        session.add(category)
-        post.categories.append(category)
+        categories.append(category)
+
+    post = Post(**data_as_dict, author=author, categories=categories)
 
     session.add(post)
     await session.commit()
