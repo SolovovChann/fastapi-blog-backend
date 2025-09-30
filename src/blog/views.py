@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from auth.dependencies import get_user_by_JWT_token
 from auth.models import User
 from auth.services import is_admin_or_raise_401
 from blog import dependencies, services
@@ -9,9 +10,7 @@ from blog.schemas import Category as CategorySchema
 from blog.schemas import CategoryCreate, CategoryUpdate, CategoryUpdatePartial
 from blog.schemas import Post as PostSchema
 from blog.schemas import PostCreate, PostUpdate, PostUpdatePartial
-from core.config import auth
 from core.database import get_scoped_session
-from auth.dependencies import get_user_by_JWT_token
 
 
 posts_router = APIRouter(prefix="/posts", tags=["Posts"])
@@ -32,16 +31,17 @@ def is_author_or_raise_401(
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail)
 
 
-def _post_to_schema(post: Post) -> PostSchema:
+async def _post_to_schema(post: Post) -> PostSchema:
     return PostSchema(
         id=post.id,
         title=post.title,
         slug=post.slug,
         content=post.content,
         categories=[
-            _category_to_schema(category) for category in post.categories
+            _category_to_schema(category)
+            for category in await post.awaitable_attrs.categories
         ],
-        author=post.author.email,
+        author=(await post.awaitable_attrs.author).email,
     )
 
 
@@ -66,7 +66,9 @@ async def create_post(
     session: AsyncSession = Depends(get_scoped_session),
 ) -> PostSchema:
     is_admin_or_raise_401(user)
-    return _post_to_schema(await services.create_post(session, user, data))
+    return await _post_to_schema(
+        await services.create_post(session, user, data)
+    )
 
 
 @categories_router.delete(
@@ -109,7 +111,8 @@ async def get_all_posts(
     session: AsyncSession = Depends(get_scoped_session),
 ) -> list[PostSchema]:
     return [
-        _post_to_schema(post) for post in await services.get_all_posts(session)
+        await _post_to_schema(post)
+        for post in await services.get_all_posts(session)
     ]
 
 
@@ -124,7 +127,7 @@ async def get_category_by_slug(
 async def get_post_by_id(
     post: Post = Depends(dependencies.get_post_by_id),
 ) -> PostSchema:
-    return _post_to_schema(post)
+    return await _post_to_schema(post)
 
 
 @categories_router.patch("/{category_slug}")
@@ -155,7 +158,7 @@ async def partial_update_post(
     is_admin_or_raise_401(user)
     is_author_or_raise_401(user, post)
 
-    return _post_to_schema(
+    return await _post_to_schema(
         await services.update_post(session, post, data, partial=True)
     )
 
@@ -183,4 +186,6 @@ async def update_post(
     is_admin_or_raise_401(user)
     is_author_or_raise_401(user, post)
 
-    return _post_to_schema(await services.update_post(session, post, data))
+    return await _post_to_schema(
+        await services.update_post(session, post, data)
+    )
