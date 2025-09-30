@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth.models import User
@@ -19,6 +19,17 @@ categories_router = APIRouter(
     prefix="/categories",
     tags=["Posts", "Categories"],
 )
+
+DEFAULT_ACCESS_RESTRICTED_MESSAGE: str = "Only author of a post can edit it"
+
+
+def is_author_or_raise_401(
+    user: User,
+    post: Post,
+    detail: str = DEFAULT_ACCESS_RESTRICTED_MESSAGE,
+) -> None:
+    if post.author != user:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail)
 
 
 def _post_to_schema(post: Post) -> PostSchema:
