@@ -2,12 +2,16 @@ import bcrypt
 from sqlalchemy import Result, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth.models import User
+from auth.models import User, UserRole
 from auth.schemas import RegisterData
 
 
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+def is_admin(user: User) -> bool:
+    return user.role == UserRole.ADMIN
 
 
 def password_is_valid(password: str, hashed_password: bytes) -> bool:
