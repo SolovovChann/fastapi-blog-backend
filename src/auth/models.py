@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import String, Enum
+from sqlalchemy import Boolean, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.database import Model
@@ -13,7 +13,12 @@ class UserRole(enum.Enum):
 
 class User(Model):
     __tablename__ = "users"
-    
+
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
     email: Mapped[str] = mapped_column(
         String(255),
         unique=True,
