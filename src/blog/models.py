@@ -69,6 +69,9 @@ class Category(Base):
     def __repr__(self) -> str:
         return f"<Category({self.slug=}, {self.name=})>"
 
+    def __str__(self) -> str:
+        return self.name
+
     @validates("slug")
     def validate_slug(self, key: str, value: str) -> str:
         return slugify(value)
