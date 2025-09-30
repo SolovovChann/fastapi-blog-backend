@@ -30,7 +30,7 @@ def _post_to_schema(post: Post) -> PostSchema:
         categories=[
             _category_to_schema(category) for category in post.categories
         ],
-        author=post.author.username,
+        author=post.author.email,
     )
 
 

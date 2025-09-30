@@ -25,17 +25,17 @@ async def login(
     credentials: Credentials,
     session: AsyncSession = Depends(get_scoped_session),
 ) -> Tokens:
-    user = await services.get_user_by_username(session, credentials.username)
+    user = await services.get_user_by_email(session, credentials.email)
 
     if user is None:
-        detail = f"User with username '{credentials.username}' is not found"
+        detail = f"User with email '{credentials.email}' is not found"
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail)
 
     if not services.password_is_valid(
         credentials.password,
         user.password.encode(),
     ):
-        detail = "Invalid username or password"
+        detail = "Invalid email or password"
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail)
 
     access_token = auth.create_access_token(str(user.id))
@@ -49,13 +49,13 @@ async def register(
     data: RegisterData,
     session: AsyncSession = Depends(get_scoped_session),
 ):
-    existing_user = await services.get_user_by_username(
+    existing_user = await services.get_user_by_email(
         session,
-        data.username,
+        data.email,
     )
 
     if existing_user is not None:
-        detail = f"User with username '{data.username}' already exists"
+        detail = f"User with email '{data.email}' already exists"
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail)
 
     user = await services.register_new_user(session, data)
@@ -98,7 +98,7 @@ async def refresh_token(request: Request, data: RefreshData) -> Tokens:
 async def _get_user_from_uid(uid: str, whatever=None) -> User:
     # NOTE auth.set_subject_getter does not support async functions.
     # You should use it with await
-    
+
     try:
         user_id = int(uid)
     except ValueError as exc:
@@ -121,7 +121,7 @@ async def get_authenticated_user_profile(
 ) -> BaseUser:
     user = await user
     return BaseUser(
-        username=user.username,
+        email=user.email,
         full_name=user.full_name,
         role=user.role,
     )

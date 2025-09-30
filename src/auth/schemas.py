@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from auth.models import UserRole
 
 
 class BaseUser(BaseModel):
-    username: str
+    email: EmailStr
     full_name: str | None
     role: UserRole
 
@@ -17,12 +17,12 @@ class User(BaseUser, UserDelete): ...
 
 
 class Credentials(BaseModel):
-    username: str
+    email: EmailStr
     password: str
 
 
 class RegisterData(BaseModel):
-    username: str
+    email: EmailStr
     password: str
 
 

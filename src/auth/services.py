@@ -6,19 +6,19 @@ from auth.models import User
 from auth.schemas import RegisterData
 
 
-def hash_password(password: str) -> bytes:
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def password_is_valid(password: str, hashed_password: bytes) -> bool:
     return bcrypt.checkpw(password.encode(), hashed_password)
 
 
-async def get_user_by_username(
+async def get_user_by_email(
     session: AsyncSession,
-    username: str,
+    email: str,
 ) -> User | None:
-    statement = select(User).filter(User.username == username)
+    statement = select(User).filter(User.email == email)
     result: Result = await session.execute(statement)
     user = result.scalars().first()
 
@@ -33,7 +33,7 @@ async def register_new_user(session: AsyncSession, data: RegisterData) -> User:
     data_as_dict = data.model_dump()
     password: str = data_as_dict.pop("password")
 
-    user = User(**data_as_dict, password=hash_password(password).decode())
+    user = User(**data_as_dict, password=hash_password(password))
 
     session.add(user)
     await session.commit()

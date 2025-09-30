@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class Category(BaseModel):
@@ -32,7 +32,7 @@ class PostDelete(BaseModel):
 
 
 class Post(BasePost, PostDelete):
-    author: str
+    author: EmailStr
     categories: list[Category]
 
 

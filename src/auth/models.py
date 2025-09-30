@@ -13,8 +13,13 @@ class UserRole(enum.Enum):
 
 class User(Model):
     __tablename__ = "users"
-
-    username: Mapped[str] = mapped_column(String(150), unique=True)
+    
+    email: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        index=True,
+        nullable=False,
+    )
     full_name: Mapped[str] = mapped_column(String(150), nullable=True)
     password: Mapped[str] = mapped_column(String(1024), unique=True)
     role: Mapped[UserRole] = mapped_column(
@@ -24,7 +29,7 @@ class User(Model):
     posts = relationship("Post", back_populates="author")
 
     def __str__(self) -> str:
-        return self.username
+        return self.email
 
     def __repr__(self) -> str:
-        return f"User({self.id=}, {self.username=}, {self.full_name=}, {self.role=})"
+        return f"<User({self.id=}, {self.email=}, {self.full_name=}, {self.role.value=})>"
