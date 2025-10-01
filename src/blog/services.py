@@ -55,10 +55,12 @@ async def create_post(
 
 async def delete_category(session: AsyncSession, category: Category) -> None:
     await session.delete(category)
+    await session.commit()
 
 
 async def delete_post(session: AsyncSession, post: Post) -> None:
     await session.delete(post)
+    await session.commit()
 
 
 async def get_all_categories(session: AsyncSession) -> list[Category]:
