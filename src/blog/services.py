@@ -129,7 +129,17 @@ async def update_post(
     data: PostUpdate | PostUpdatePartial,
     partial: bool = False,
 ) -> Post:
-    for key, value in data.model_dump(exclude_none=partial).items():
+    data_as_dict = data.model_dump(exclude_none=partial)
+
+    if "categories" in data_as_dict:
+        await post.awaitable_attrs.categories
+
+        post.categories = await get_categories_from_slug(
+            session,
+            data_as_dict.pop("categories"),
+        )
+
+    for key, value in data_as_dict.items():
         setattr(post, key, value)
 
     await session.commit()
