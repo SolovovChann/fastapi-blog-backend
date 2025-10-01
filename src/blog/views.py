@@ -14,10 +14,7 @@ from core.database import get_scoped_session
 
 
 posts_router = APIRouter(prefix="/posts", tags=["Posts"])
-categories_router = APIRouter(
-    prefix="/categories",
-    tags=["Posts", "Categories"],
-)
+categories_router = APIRouter(prefix="/categories", tags=["Categories"])
 
 DEFAULT_ACCESS_RESTRICTED_MESSAGE: str = "Only author of a post can edit it"
 
