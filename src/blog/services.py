@@ -98,6 +98,23 @@ async def get_post_by_id(session: AsyncSession, id: int) -> Post | None:
     return await session.get(Post, id)
 
 
+async def get_posts_by_category(
+    session: AsyncSession,
+    category_slug: str,
+) -> list[Post]:
+    category = await get_category_by_slug(session, category_slug)
+    statement = (
+        select(Post)
+        .join(Post.categories)
+        .where(Post.categories.contains(category))
+        .order_by(Post.id)
+        .distinct()
+    )
+    posts = (await session.execute(statement)).scalars().all()
+
+    return list(posts)
+
+
 async def get_post_by_slug(
     session: AsyncSession,
     slug: str,
