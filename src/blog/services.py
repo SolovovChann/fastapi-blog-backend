@@ -32,17 +32,7 @@ async def create_post(
     data: PostCreate,
 ) -> Post:
     data_as_dict = data.model_dump()
-    categories: list[Category] = []
-
-    for slug in data_as_dict.pop("categories", []):
-        category = await get_category_by_slug(session, slug)
-
-        if category is None:
-            # NOTE rasing exception is better approach.
-            # Rewrite later
-            continue
-
-        categories.append(category)
+    categories = await get_categories_from_slug(session, data_as_dict)
 
     post = Post(**data_as_dict, author=author, categories=categories)
 
@@ -84,6 +74,24 @@ async def get_category_by_slug(
     slug: str,
 ) -> Category | None:
     return await session.get(Category, slug)
+
+
+async def get_categories_from_slug(
+    session: AsyncSession, slugs: list[str]
+) -> list[Category]:
+    categories: list[Category] = []
+
+    for slug in slugs:
+        category = await get_category_by_slug(session, slug)
+
+        if category is None:
+            # NOTE rasing exception is better approach.
+            # Rewrite later
+            continue
+
+        categories.append(category)
+
+    return categories
 
 
 async def get_post_by_id(session: AsyncSession, id: int) -> Post | None:
