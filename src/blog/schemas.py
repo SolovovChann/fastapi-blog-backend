@@ -38,6 +38,7 @@ class Post(BasePost, PostDelete):
 
 class PostUpdate(BaseModel):
     title: str
+    slug: str
     content: str
     categories: list[str]
 
