@@ -113,6 +113,17 @@ async def get_all_posts(
     ]
 
 
+@posts_router.get("/categories/{category_slug}/posts")
+async def get_posts_by_category_slug(
+    category_slug: str,
+    session: AsyncSession = Depends(get_scoped_session),
+) -> list[PostSchema]:
+    return [
+        await _post_to_schema(post)
+        for post in await services.get_posts_by_category(session, category_slug)
+    ]
+
+
 @categories_router.get("/{category_slug}")
 async def get_category_by_slug(
     category: Category = Depends(dependencies.get_category_by_slug),
